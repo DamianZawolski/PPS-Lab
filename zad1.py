@@ -2,10 +2,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal as sig
 
-def lowpass(signal):
-    dp_2 = sig.firwin(100, 10000, fs=fs)
-    chirp_dp = sig.lfilter(dp_2, 1, signal)
-    return chirp_dp
+
+def lowpass_filter(signal, sample_rate, cutoff_frequency):
+  # Obliczenie liczby próbek w sygnale
+  num_samples = signal.shape[0]
+  # Obliczenie odstępu pomiędzy kolejnymi próbkami sygnału
+  sample_spacing = 1.0 / sample_rate
+  # Obliczenie częstotliwości krokowej
+  frequency_step = 1.0 / (num_samples * sample_spacing)
+  # Obliczenie częstotliwości skali
+  frequencies = np.arange(num_samples) * frequency_step
+  # Obliczenie FFT
+  fft = np.fft.fft(signal)
+  # Utworzenie maski filtrującej
+  mask = frequencies < cutoff_frequency
+  # Zastosowanie maski do FFT
+  filtered_fft = fft.copy()
+  filtered_fft[mask] = 0
+  # Odtworzenie sygnału po zastosowaniu filtru
+  filtered_signal = np.fft.ifft(filtered_fft)
+  return filtered_signal
+
 
 # Wykres dla sygnału 100Hz
 fs = 48000
@@ -26,8 +43,7 @@ plt.ylabel('Amplituda widma')
 plt.title('Widmo trzech sinusów- przed filtrem dolnoprzepustowym')
 plt.show()
 
-cutoff_frequency = 2000
-lp = lowpass(three_sinuses)
+lp = lowpass_filter(three_sinuses, fs, 47600)
 lp = np.fft.rfft(lp)
 plt.plot(f, np.abs(lp) / 1024)
 plt.xlim(0, 1000)
