@@ -36,6 +36,7 @@ fig = plt.gcf()
 fig.set_size_inches(10, 8)
 ax[0].plot(klarnet, label='oryginalny')
 ax[1].plot(klarnet_filtrowany, label='po filtracji')
+
 for a in ax:
     a.set_xlabel('częstotliwość [Hz]')
     a.set_ylabel('amplituda [dB]')
