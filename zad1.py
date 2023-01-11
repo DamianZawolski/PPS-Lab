@@ -2,28 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal as sig
 
-
-def lowpass_filter(signal, sample_rate, cutoff_frequency):
-  # Obliczenie liczby próbek w sygnale
-  num_samples = signal.shape[0]
-  # Obliczenie odstępu pomiędzy kolejnymi próbkami sygnału
-  sample_spacing = 1.0 / sample_rate
-  # Obliczenie częstotliwości krokowej
-  frequency_step = 1.0 / (num_samples * sample_spacing)
-  # Obliczenie częstotliwości skali
-  frequencies = np.arange(num_samples) * frequency_step
-  # Obliczenie FFT
-  fft = np.fft.fft(signal)
-  # Utworzenie maski filtrującej
-  mask = frequencies < cutoff_frequency
-  # Zastosowanie maski do FFT
-  filtered_fft = fft.copy()
-  filtered_fft[mask] = 0
-  # Odtworzenie sygnału po zastosowaniu filtru
-  filtered_signal = np.fft.ifft(filtered_fft)
-  return filtered_signal
-
-
 # Wykres dla sygnału 100Hz
 fs = 48000
 hz = 100
@@ -34,20 +12,25 @@ three_sinuses = (0.5 * np.sin(2 * np.pi * n * hz / fs) +
                  0.3 * np.sin(2 * np.pi * n * 3 * hz / fs) +
                  0.2 * np.sin(2 * np.pi * n * 5 * hz / fs))
 
-widmo_trzech_sinusow = np.fft.rfft(three_sinuses)
-f = np.fft.rfftfreq(2048, 1 / fs)
-plt.plot(f, np.abs(widmo_trzech_sinusow) / 1024)
-plt.xlim(0, 1000)
-plt.xlabel('Częstotliwość [Hz]')
-plt.ylabel('Amplituda widma')
-plt.title('Widmo trzech sinusów- przed filtrem dolnoprzepustowym')
-plt.show()
+n = np.arange(2048)
+trzysin = (np.sin(2 * np.pi * n * 1000 / fs) +
+           np.sin(2 * np.pi * n * 3000 / fs) +
+           np.sin(2 * np.pi * n * 5000 / fs)) / 3
+widmo_trzysin = 20 * np.log10(np.abs(np.fft.rfft(trzysin * np.hamming(2048))) / 1024)
+dp_4 = sig.firwin(100, 4000, fs=fs)
+trzysin_filtr = sig.lfilter(dp_4, 1, trzysin)
+widmo_filtr = 20 * np.log10(np.abs(np.fft.rfft(trzysin_filtr * np.hamming(2048))) / 1024)
 
-lp = lowpass_filter(three_sinuses, fs, 47600)
-lp = np.fft.rfft(lp)
-plt.plot(f, np.abs(lp) / 1024)
-plt.xlim(0, 1000)
-plt.xlabel('Częstotliwość [Hz]')
-plt.ylabel('Amplituda widma')
-plt.title('Widmo trzech sinusów- po filtrze dolnoprzepustowym')
+f = np.fft.rfftfreq(2048, 1 / fs)
+_, ax = plt.subplots(2)
+ax[0].plot(f, widmo_trzysin, label='oryginalny')
+ax[1].plot(f, widmo_filtr, label='po filtracji', color= "red")
+fig = plt.gcf()
+fig.set_size_inches(10, 8)
+for a in ax:
+    a.set_xlabel('częstotliwość [Hz]')
+    a.set_ylabel('amplituda [dB]')
+    a.legend()
+    a.set_xlim(0, 10000)
+ax[0].set_title('Filtracja DP sumy trzech sinusów')
 plt.show()
