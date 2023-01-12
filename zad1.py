@@ -2,15 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal as sig
 
-# Wykres dla sygnału 100Hz
 fs = 48000
 hz = 100
 n = np.arange(2048)
 
 # Wykres dla zmieszanych sygnałów 100, 300 i 500Hz
-three_sinuses = (0.5 * np.sin(2 * np.pi * n * hz / fs) +
-                 0.3 * np.sin(2 * np.pi * n * 3 * hz / fs) +
-                 0.2 * np.sin(2 * np.pi * n * 5 * hz / fs))
+trzy_sinusy = (0.5 * np.sin(2 * np.pi * n * hz / fs) +
+               0.3 * np.sin(2 * np.pi * n * 3 * hz / fs) +
+               0.2 * np.sin(2 * np.pi * n * 5 * hz / fs))
 
 n = np.arange(2048)
 trzysin = (np.sin(2 * np.pi * n * 1000 / fs) +
@@ -28,9 +27,9 @@ ax[1].plot(f, widmo_filtr, label='po filtracji', color= "red")
 fig = plt.gcf()
 fig.set_size_inches(10, 8)
 for a in ax:
-    a.set_xlabel('częstotliwość [Hz]')
-    a.set_ylabel('amplituda [dB]')
+    a.set_xlabel('Częstotliwość [Hz]')
+    a.set_ylabel('Amplituda [dB]')
     a.legend()
     a.set_xlim(0, 10000)
-ax[0].set_title('Filtracja DP sumy trzech sinusów')
+ax[0].set_title('Filtracja sumy trzech sinusów filtrem dolnoprzepustowym')
 plt.show()
